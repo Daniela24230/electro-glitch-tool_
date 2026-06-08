@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELECTRO MUSIC TOOL</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="editor-container">
+        <nav class="nav">
+            <button class="active" onclick="showPage('text')">ТЕКСТ</button>
+            <button onclick="showPage('anim')">АНИМАЦИЯ</button>
+        </nav>
+
+        <div class="main-content">
+            <div class="controls">
+                <h1>ELECTRO MUSIC<br>TOOL</h1>
+                <div class="input-group">
+                    <label>СКАЖИ ЧТО-НИБУДЬ</label>
+                    <textarea id="textInput" placeholder="ELECTRIC"></textarea>
+                </div>
+                <div class="slider-group" id="sliderGroup">
+                    <label>РАЗМЕР ЗУБЦОВ</label>
+                    <input type="range" id="shredRange" min="5" max="300" value="150">
+                    <div class="labels">
+                        <span>СКУЧНО</span>
+                        <span>ДРУГОЕ ДЕЛО</span>
+                        <span>ВОУ!</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <button id="saveBtn" class="download-btn">СКАЧАТЬ</button>
+                <div class="canvas-wrapper">
+                    <canvas id="glitchCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
