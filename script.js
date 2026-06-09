@@ -8,33 +8,40 @@ let currentAnimShred = 150;
 let targetShred = 150;
 const speed = 0.2;
 
-function drawTextWithSpacing(ctx, text, x, y, spacing) {
-    let currentX = x;
-    for (let char of text) {
-        ctx.fillText(char, currentX, y);
-        currentX += ctx.measureText(char).width + spacing;
-    }
-}
+const letterSpacing = -6; 
 
 function draw() {
-    const lines = (input.value || "ELECTRIC").split('\n');
-    const W = 1200; const H = 800;
+    const text = input.value || "ELECTRIC";
+    const W = 1200, H = 800;
+    const padding = 100;
+    const maxWidth = W - padding * 2;
+    const fontSize = 180;
+    const lineHeight = fontSize * 0.8;
+    
     canvas.width = W; canvas.height = H;
-    const spacing = -15;
-    const fontSize = 240;
-
     ctx.font = `900 ${fontSize}px "Bebas Neue"`;
     ctx.fillStyle = 'black'; ctx.fillRect(0, 0, W, H);
+
+    const words = text.toUpperCase().split(' ');
+    const lines = [];
+    let currentLine = words[0] || "";
+    for (let i = 1; i < words.length; i++) {
+        if (ctx.measureText(currentLine + " " + words[i]).width < maxWidth) currentLine += " " + words[i];
+        else { lines.push(currentLine); currentLine = words[i]; }
+    }
+    lines.push(currentLine);
 
     const tCtx = document.createElement('canvas').getContext('2d');
     tCtx.canvas.width = W; tCtx.canvas.height = H;
     tCtx.font = ctx.font; tCtx.fillStyle = 'white';
+    let startY = H / 2 - (lines.length * lineHeight) / 2 + lineHeight/3;
 
-    const startY = H - 80 - ((lines.length - 1) * (fontSize * 0.85));
     lines.forEach((line, i) => {
-        const text = line.toUpperCase();
-        const totalWidth = text.split('').reduce((acc, char) => acc + tCtx.measureText(char).width, 0) + (text.length - 1) * spacing;
-        drawTextWithSpacing(tCtx, text, W/2 - totalWidth/2, startY + (i * fontSize * 0.85), spacing);
+        let currentX = W - padding - tCtx.measureText(line).width;
+        for (let char of line) {
+            tCtx.fillText(char, currentX, startY + i * lineHeight);
+            currentX += tCtx.measureText(char).width + letterSpacing;
+        }
     });
 
     const pixels = tCtx.getImageData(0, 0, W, H).data;
@@ -44,8 +51,8 @@ function draw() {
         const columnShred = Math.pow(Math.random(), 1.5) * shredForce;
         for (let y = 0; y < H; y++) {
             if (pixels[(y * W + x) * 4] > 200 && columnShred > 10) {
-                ctx.fillStyle = 'rgba(255, 255, 0, 0.1)'; ctx.fillRect(x, y - columnShred, 1, columnShred);
-                ctx.fillStyle = 'rgb(0, 255, 0)'; ctx.fillRect(x-1, y - (columnShred * 0.9), 1, columnShred * 0.7);
+                ctx.fillStyle = 'rgba(198, 117, 255, 0.69)'; ctx.fillRect(x, y - columnShred, 1, columnShred);
+                ctx.fillStyle = 'rgb(128, 0, 255)'; ctx.fillRect(x-1, y - (columnShred * 0.9), 1, columnShred * 0.7);
                 ctx.fillStyle = 'white'; ctx.fillRect(x-1.5, y - (columnShred * 0.4), 1, columnShred * 0.3);
             }
         }
@@ -53,18 +60,17 @@ function draw() {
     
     ctx.fillStyle = 'white';
     lines.forEach((line, i) => {
-        const text = line.toUpperCase();
-        const totalWidth = text.split('').reduce((acc, char) => acc + ctx.measureText(char).width, 0) + (text.length - 1) * spacing;
-        drawTextWithSpacing(ctx, text, W/2 - totalWidth/2, startY + (i * fontSize * 0.85), spacing);
+        let currentX = W - padding - ctx.measureText(line).width;
+        for (let char of line) {
+            ctx.fillText(char, currentX, startY + i * lineHeight);
+            currentX += ctx.measureText(char).width + letterSpacing;
+        }
     });
 }
 
 function animate() {
     if (currentPage === 'anim') {
-        if (Math.abs(currentAnimShred - targetShred) < 20) {
-            const states = [150, 300, 300, 150, 150, 75];
-            targetShred = states[Math.floor(Math.random() * states.length)];
-        }
+        if (Math.abs(currentAnimShred - targetShred) < 20) targetShred = [150, 300, 300, 150, 150, 75][Math.floor(Math.random() * 6)];
         currentAnimShred += (targetShred - currentAnimShred) * speed;
         draw();
         requestAnimationFrame(animate);
@@ -83,12 +89,19 @@ shredSlider.addEventListener('input', (e) => { manualShred = parseInt(e.target.v
 input.addEventListener('input', draw);
 
 document.getElementById('saveBtn').addEventListener('click', () => {
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+        if (data[i] === 0 && data[i+1] === 0 && data[i+2] === 0) data[i+3] = 0;
+    }
+    ctx.putImageData(imageData, 0, 0);
     const link = document.createElement('a');
     link.download = `shred-${Date.now()}.png`;
     link.href = canvas.toDataURL('image/png');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    draw();
 });
 
-document.fonts.load('900 240px "Bebas Neue"').then(draw);
+document.fonts.load('900 180px "Bebas Neue"').then(draw);
