@@ -8,6 +8,7 @@ let currentAnimShred = 150;
 let targetShred = 150;
 const speed = 0.2;
 
+// Настройка интервалов
 const letterSpacing = -6; 
 
 function draw() {
