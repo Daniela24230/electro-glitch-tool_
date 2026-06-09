@@ -7,9 +7,15 @@ let manualShred = 150;
 let currentAnimShred = 150;
 let targetShred = 150;
 const speed = 0.2;
+const letterSpacing = -10; 
 
-// Настройка интервалов
-const letterSpacing = -6; 
+function getRealWidth(text) {
+    let width = 0;
+    for (let char of text) {
+        width += ctx.measureText(char).width + letterSpacing;
+    }
+    return width - letterSpacing;
+}
 
 function draw() {
     const text = input.value || "ELECTRIC";
@@ -23,25 +29,29 @@ function draw() {
     ctx.font = `900 ${fontSize}px "Bebas Neue"`;
     ctx.fillStyle = 'black'; ctx.fillRect(0, 0, W, H);
 
-    const words = text.toUpperCase().split(' ');
+    const paragraphs = text.toUpperCase().split('\n');
     const lines = [];
-    let currentLine = words[0] || "";
-    for (let i = 1; i < words.length; i++) {
-        if (ctx.measureText(currentLine + " " + words[i]).width < maxWidth) currentLine += " " + words[i];
-        else { lines.push(currentLine); currentLine = words[i]; }
-    }
-    lines.push(currentLine);
+    paragraphs.forEach(para => {
+        const words = para.split(' ');
+        let currentLine = words[0] || "";
+        for (let i = 1; i < words.length; i++) {
+            if (getRealWidth(currentLine + " " + words[i]) < maxWidth) currentLine += " " + words[i];
+            else { lines.push(currentLine); currentLine = words[i]; }
+        }
+        lines.push(currentLine);
+    });
 
     const tCtx = document.createElement('canvas').getContext('2d');
     tCtx.canvas.width = W; tCtx.canvas.height = H;
     tCtx.font = ctx.font; tCtx.fillStyle = 'white';
-    let startY = H / 2 - (lines.length * lineHeight) / 2 + lineHeight/3;
+    
+    let startY = H - padding - (lines.length * lineHeight) + lineHeight/3;
 
     lines.forEach((line, i) => {
-        let currentX = W - padding - tCtx.measureText(line).width;
+        let currentX = W - padding - getRealWidth(line);
         for (let char of line) {
             tCtx.fillText(char, currentX, startY + i * lineHeight);
-            currentX += tCtx.measureText(char).width + letterSpacing;
+            currentX += ctx.measureText(char).width + letterSpacing;
         }
     });
 
@@ -61,7 +71,7 @@ function draw() {
     
     ctx.fillStyle = 'white';
     lines.forEach((line, i) => {
-        let currentX = W - padding - ctx.measureText(line).width;
+        let currentX = W - padding - getRealWidth(line);
         for (let char of line) {
             ctx.fillText(char, currentX, startY + i * lineHeight);
             currentX += ctx.measureText(char).width + letterSpacing;
