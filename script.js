@@ -2,7 +2,8 @@ const canvas = document.getElementById('glitchCanvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const input = document.getElementById('textInput');
 const shredSlider = document.getElementById('shredRange');
-let currentPage = 'text';
+
+let currentPage = 'text'; 
 let manualShred = 150;
 let currentAnimShred = 150;
 let targetShred = 150;
@@ -21,31 +22,27 @@ function draw() {
     const text = input.value || "ELECTRIC";
     const W = 1200, H = 800;
     const padding = 100;
-    const maxWidth = W - padding * 2;
-    const fontSize = 180;
+    const fontSize = 250;
     const lineHeight = fontSize * 0.8;
     
     canvas.width = W; canvas.height = H;
-    ctx.font = `900 ${fontSize}px "Bebas Neue"`;
+    ctx.font = `500 ${fontSize}px "DrukCyr"`;
     ctx.fillStyle = 'black'; ctx.fillRect(0, 0, W, H);
 
-    const paragraphs = text.toUpperCase().split('\n');
-    const lines = [];
-    paragraphs.forEach(para => {
-        const words = para.split(' ');
-        let currentLine = words[0] || "";
-        for (let i = 1; i < words.length; i++) {
-            if (getRealWidth(currentLine + " " + words[i]) < maxWidth) currentLine += " " + words[i];
-            else { lines.push(currentLine); currentLine = words[i]; }
-        }
-        lines.push(currentLine);
-    });
+    // Логика заголовка в одну строку
+    const lines = text.toUpperCase().split('\n');
 
     const tCtx = document.createElement('canvas').getContext('2d');
     tCtx.canvas.width = W; tCtx.canvas.height = H;
     tCtx.font = ctx.font; tCtx.fillStyle = 'white';
     
-    let startY = H - padding - (lines.length * lineHeight) + lineHeight/3;
+    // Восстановленная логика переворота (прижим к верху/низу)
+    let startY;
+    if (currentPage === 'down') {
+        startY = padding + fontSize * 0.6; // Прижим к верху
+    } else {
+        startY = H - padding - (lines.length * lineHeight) + lineHeight/3; // Прижим к низу
+    }
 
     lines.forEach((line, i) => {
         let currentX = W - padding - getRealWidth(line);
@@ -56,19 +53,27 @@ function draw() {
     });
 
     const pixels = tCtx.getImageData(0, 0, W, H).data;
+    const isDown = (currentPage === 'down');
     const shredForce = (currentPage === 'anim') ? currentAnimShred : manualShred;
 
+    // Отрисовка эффекта "зубцов"
     for (let x = 0; x < W; x++) {
         const columnShred = Math.pow(Math.random(), 1.5) * shredForce;
         for (let y = 0; y < H; y++) {
             if (pixels[(y * W + x) * 4] > 200 && columnShred > 10) {
-                ctx.fillStyle = 'rgba(198, 117, 255, 0.69)'; ctx.fillRect(x, y - columnShred, 1, columnShred);
-                ctx.fillStyle = 'rgb(128, 0, 255)'; ctx.fillRect(x-1, y - (columnShred * 0.9), 1, columnShred * 0.7);
-                ctx.fillStyle = 'white'; ctx.fillRect(x-1.5, y - (columnShred * 0.4), 1, columnShred * 0.3);
+                // Если режим 'down', зубцы растут от y вниз
+                const startY_shred = isDown ? y : y - columnShred;
+                ctx.fillStyle = 'rgba(198, 117, 255, 0.69)'; 
+                ctx.fillRect(x, startY_shred, 1, columnShred);
+                ctx.fillStyle = 'rgb(128, 0, 255)'; 
+                ctx.fillRect(x-1, startY_shred + (isDown ? 0 : columnShred * 0.1), 1, columnShred * 0.7);
+                ctx.fillStyle = 'white'; 
+                ctx.fillRect(x-1.5, startY_shred + (isDown ? 0 : columnShred * 0.4), 1, columnShred * 0.3);
             }
         }
     }
     
+    // Финальная отрисовка текста
     ctx.fillStyle = 'white';
     lines.forEach((line, i) => {
         let currentX = W - padding - getRealWidth(line);
@@ -91,7 +96,9 @@ function animate() {
 function showPage(page) {
     currentPage = page;
     document.body.classList.toggle('anim-mode', page === 'anim');
-    document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.innerText === (page === 'text' ? 'ТЕКСТ' : 'АНИМАЦИЯ')));
+    const buttons = document.querySelectorAll('.nav .icon-btn');
+    buttons.forEach((b, i) => b.classList.toggle('active', (i === (page === 'text' ? 0 : page === 'anim' ? 1 : 2))));
+    
     if (page === 'anim') animate();
     else draw();
 }
@@ -115,4 +122,4 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     draw();
 });
 
-document.fonts.load('900 180px "Bebas Neue"').then(draw);
+document.fonts.load('500 250px "DrukCyr"').then(draw);
