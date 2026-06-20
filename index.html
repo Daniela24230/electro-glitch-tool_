@@ -9,13 +9,13 @@
 <body>
     <div class="editor-container">
         <nav class="nav">
-            <button class="active" onclick="showPage('text')">ТЕКСТ</button>
-            <button onclick="showPage('anim')">АНИМАЦИЯ</button>
+            <button class="active icon-btn" onclick="showPage('text')"><img src="icon-text.png" alt="Текст"></button>
+            <button class="icon-btn" onclick="showPage('anim')"><img src="icon-anim.png" alt="Анимация"></button>
+            <button class="icon-btn" onclick="showPage('down')"><img src="icon-wrap.png" alt="Зубцы вниз"></button>
         </nav>
-
         <div class="main-content">
             <div class="controls">
-                <h1>ELECTRO MUSIC<br>TOOL</h1>
+                <h1>ELECTRO TOOL</h1>
                 <div class="input-group">
                     <label>СКАЖИ ЧТО-НИБУДЬ</label>
                     <textarea id="textInput" placeholder="ELECTRIC"></textarea>
@@ -23,19 +23,14 @@
                 <div class="slider-group" id="sliderGroup">
                     <label>РАЗМЕР ЗУБЦОВ</label>
                     <input type="range" id="shredRange" min="5" max="300" value="150">
-                    <div class="labels">
-                        <span>СКУЧНО</span>
-                        <span>ДРУГОЕ ДЕЛО</span>
-                        <span>ВОУ!</span>
-                    </div>
+                    <div class="labels"><span>СКУЧНО</span><span>ДРУГОЕ ДЕЛО</span><span>ВОУ!</span></div>
                 </div>
             </div>
-
             <div class="right-panel">
-                <button id="saveBtn" class="download-btn">СКАЧАТЬ</button>
-                <div class="canvas-wrapper">
-                    <canvas id="glitchCanvas"></canvas>
-                </div>
+                <button id="saveBtn" class="download-btn">
+                    <img src="icon-down.png" alt="Скачать">
+                </button>
+                <div class="canvas-wrapper"><canvas id="glitchCanvas"></canvas></div>
             </div>
         </div>
     </div>
